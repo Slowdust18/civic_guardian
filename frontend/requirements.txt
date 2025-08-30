@@ -1,0 +1,7 @@
+# Frontend Dependencies
+- react-router-dom  
+- axios             
+- leaflet & react-leaflet 
+
+#install it like this fam, npm install react-router-dom axios leaflet react-leaflet
+#run frontend server with this npm start

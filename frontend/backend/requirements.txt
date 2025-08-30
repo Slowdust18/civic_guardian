@@ -1,0 +1,7 @@
+fastapi
+uvicorn[standard]
+pydantic         
+python-dotenv     
+
+#install it with this pip install -r requirements.txt
+#run the backend server with this uvicorn main:app --reload
