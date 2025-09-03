@@ -10,4 +10,5 @@ passlib[bcrypt]
 python-jose
 geoalchemy2
 shapely
+werkzeug
 

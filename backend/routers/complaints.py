@@ -72,7 +72,8 @@ def get_complaints(db: Session = Depends(get_db)):
             "status": c.status,
             "image_url": c.image_url,
             "location": mapping(geom) if geom else None,  # shapely -> GeoJSON dict
-            "created_at": c.created_at.isoformat() if c.created_at else None
+            "created_at": c.created_at.isoformat() if c.created_at else None,
+            "locationName": c.locationName  # ✅ fixed
         })
     return result
 

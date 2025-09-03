@@ -1,5 +1,6 @@
 # --- Python backend ignores ---
 backend/venv/
+backend/uploads/
 frontend/backend/venv/
 __pycache__/
 *.pyc
