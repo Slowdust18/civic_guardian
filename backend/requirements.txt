@@ -11,4 +11,9 @@ python-jose
 geoalchemy2
 shapely
 werkzeug
-
+scikit-learn
+alembic
+httpx
+groq
+pillow
+pydantic-settings

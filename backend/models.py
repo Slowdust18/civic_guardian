@@ -29,6 +29,7 @@ class User(Base):
     age = Column(Integer, nullable=False)
     aadhar_number = Column(String(12), unique=True, nullable=False)  # Aadhaar is 12 digits
     email = Column(String(100), unique=True, nullable=False)
+    phnumber = Column(String(10), unique=True, nullable=False)
     password_hash = Column(TEXT, nullable=False)
     role = Column(String(20), default="citizen")   # citizen, admin
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())

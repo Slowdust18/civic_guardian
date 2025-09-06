@@ -10,31 +10,35 @@ from shapely.geometry import Point
 models.Base.metadata.create_all(bind=engine)
 
 db = SessionLocal()
-
 def seed_users():
     users = [
         models.User(first_name="Anirudh", last_name="Sarkar", age=21,
                     aadhar_number="111122223333", email="anirudh@example.com",
+                    phnumber="9000000001",
                     password_hash=generate_password_hash("password123"),
                     role="citizen"),
 
         models.User(first_name="Ravi", last_name="Kumar", age=35,
                     aadhar_number="222233334444", email="ravi@example.com",
+                    phnumber="9000000002",
                     password_hash=generate_password_hash("password123"),
                     role="citizen"),
 
         models.User(first_name="Meera", last_name="Sharma", age=28,
                     aadhar_number="333344445555", email="meera@example.com",
+                    phnumber="9000000003",
                     password_hash=generate_password_hash("password123"),
                     role="citizen"),
 
         models.User(first_name="Admin", last_name="User", age=40,
                     aadhar_number="444455556666", email="admin@example.com",
+                    phnumber="9000000004",
                     password_hash=generate_password_hash("adminpass"),
                     role="admin"),
 
         models.User(first_name="Sita", last_name="Iyer", age=32,
                     aadhar_number="555566667777", email="sita@example.com",
+                    phnumber="9000000005",
                     password_hash=generate_password_hash("password123"),
                     role="citizen"),
     ]

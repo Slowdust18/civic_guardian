@@ -1,6 +1,15 @@
 from pydantic import BaseModel, EmailStr
 from typing import Optional, Dict, Any
 from datetime import datetime
+from typing import List
+
+class AIResponse(BaseModel):
+    inferred_title: str
+    description: str
+    descriptions: List[str]
+    suggested_category: str
+    suggested_department: str
+    tags: List[str]
 
 # Base schema (shared fields)
 class ComplaintBase(BaseModel):
@@ -27,7 +36,7 @@ class ComplaintResponse(ComplaintBase):
     locationName: Optional[str]
 
     class Config:
-        orm_mode = True
+        from_attributes= True
 
 # Complaint Update Schema
 class ComplaintUpdate(BaseModel):
@@ -37,7 +46,7 @@ class ComplaintUpdate(BaseModel):
     process: Optional[str] = None
 
     class Config:
-        orm_mode = True  # lets Pydantic work directly with ORM objects
+        from_attributes = True  # lets Pydantic work directly with ORM objects
 
 
 class UserCreate(BaseModel):
@@ -45,8 +54,9 @@ class UserCreate(BaseModel):
     last_name: str
     age: int
     aadhar_number: str
-    email: EmailStr
-    password: str   # plain password, will be hashed
+    email: str
+    phnumber: str
+    password: str
 
 class UserOut(BaseModel):
     id: int
@@ -56,6 +66,15 @@ class UserOut(BaseModel):
     aadhar_number: str
     email: EmailStr
     role: str
+    phnumber: str
 
     class Config:
         from_attributes = True
+
+class AIResponse(BaseModel):
+    inferred_title: str
+    description: str
+    descriptions: List[str]
+    suggested_category: str
+    suggested_department: str
+    tags: List[str]

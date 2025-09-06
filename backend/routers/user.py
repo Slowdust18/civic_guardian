@@ -37,6 +37,7 @@ def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
         age=user.age,
         aadhar_number=user.aadhar_number,
         email=user.email,
+        phnumber=user.phnumber, 
         password_hash=hashed_pw
     )
 
