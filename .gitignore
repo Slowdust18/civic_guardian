@@ -1,5 +1,5 @@
 # --- Python backend ignores ---
-backend/venv/
+backend/.venv/
 backend/uploads/
 frontend/backend/venv/
 __pycache__/
@@ -25,6 +25,8 @@ package-lock.json
 *.env.development.local
 *.env.test.local
 *.env.production.local
+.venv/
+
 
 # --- IDE / editor files ---
 .vscode/
