@@ -16,7 +16,7 @@ class Complaint(Base):
     priority = Column(String, default="none")      # none, low, medium, high
     image_url = Column(String, nullable=True)
     location = Column(Geography(geometry_type="POINT", srid=4326))
-    locationName = Column("locationname", String, nullable=True)
+    locationName = Column("locationName", String, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     process= Column(String, nullable=True) # unassigned, assigned, in_progress, pending_verification
     user = relationship("User", back_populates="complaints")

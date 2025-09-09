@@ -1,7 +1,6 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List, Literal
 from datetime import datetime
-from typing import List
 
 class AIResponse(BaseModel):
     inferred_title: str
@@ -17,14 +16,11 @@ class ComplaintBase(BaseModel):
     description: str
     department: str
 
-
-
 # For creating complaints (input from frontend)
 class ComplaintCreate(ComplaintBase):
     latitude: float
     longitude: float
     image_url: Optional[str] = None
-
 
 # For returning complaints (output to frontend)
 class ComplaintResponse(ComplaintBase):
@@ -46,8 +42,7 @@ class ComplaintUpdate(BaseModel):
     process: Optional[str] = None
 
     class Config:
-        from_attributes = True  # lets Pydantic work directly with ORM objects
-
+        from_attributes = True
 
 class UserCreate(BaseModel):
     first_name: str
@@ -71,10 +66,6 @@ class UserOut(BaseModel):
     class Config:
         from_attributes = True
 
-class AIResponse(BaseModel):
-    inferred_title: str
-    description: str
-    descriptions: List[str]
-    suggested_category: str
-    suggested_department: str
-    tags: List[str]
+# Schema for updating urgency (priority)
+class UrgencyUpdate(BaseModel):
+    urgency: Literal['LOW', 'MEDIUM', 'HIGH']

@@ -5,7 +5,9 @@ from config import settings
 from typing import Optional
 import json
 from schemas import AIResponse
-router = APIRouter(prefix="/AIhelp",
+import logging
+logger = logging.getLogger(__name__)
+router = APIRouter(
     tags=["AIhelp"])
 
 # Initialize Groq client
@@ -40,13 +42,16 @@ def _user_prompt(title, description, category, department, urgency):
     )
 
 
-@router.post("/assist", response_model=AIResponse)
+@router.post("/AIhelp/assist", response_model=AIResponse)
 async def ai_assist(
     title: Optional[str] = Form(default=None),
     description: Optional[str] = Form(default=None),
     category: Optional[str] = Form(default=None),
     department: Optional[str] = Form(default=None),
 ):
+    logger.info("AI Assist endpoint hit")
+    logger.info(f"title={title}, description={description}, category={category}, department={department}")
+    ...
     messages = [
         {"role": "system", "content": _system_prompt()},
         {"role": "user", "content": _user_prompt(title, description, category, department, None)},

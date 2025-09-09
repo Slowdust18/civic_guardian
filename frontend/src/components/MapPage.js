@@ -1,7 +1,7 @@
 // src/components/MapPage.js
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import axios from "axios";
 import L from "leaflet";
@@ -17,7 +17,7 @@ L.Icon.Default.mergeOptions({
     "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
 });
 
-function MapPage() {
+function MapPage({ value, onChange }) {
   const navigate = useNavigate();
   const [complaints, setComplaints] = useState([]);
 
@@ -27,6 +27,19 @@ function MapPage() {
       .then((res) => setComplaints(res.data))
       .catch((err) => console.error(err));
   }, []);
+
+  // Component to handle map click events
+  function LocationSelector() {
+    useMapEvents({
+      click(e) {
+        onChange({
+          coords: [e.latlng.lat, e.latlng.lng],
+          locationName: "Selected Location", // Optional: reverse geocode later
+        });
+      },
+    });
+    return null;
+  }
 
   return (
     <div style={{ height: "100vh", width: "100%" }}>
@@ -47,18 +60,16 @@ function MapPage() {
       </button>
 
       <MapContainer
-        center={[13.08, 80.22]} // center on Chennai-ish area
+        center={value?.coords || [13.08, 80.22]} // Use selected coords if available
         zoom={13}
         style={{ height: "90%", width: "100%" }}
       >
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
-        {/* Render complaint markers */}
+        {/* Complaint markers */}
         {complaints.map((c) => {
           if (!c.location || !c.location.coordinates) return null;
-
           const [lng, lat] = c.location.coordinates; // GeoJSON = [lon, lat]
-
           return (
             <Marker key={c.id} position={[lat, lng]}>
               <Popup>
@@ -73,6 +84,12 @@ function MapPage() {
             </Marker>
           );
         })}
+
+        {/* Marker for selected location */}
+        {value?.coords && <Marker position={value.coords} />}
+
+        {/* Click handler */}
+        <LocationSelector />
       </MapContainer>
     </div>
   );

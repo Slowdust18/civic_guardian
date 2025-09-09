@@ -4,6 +4,7 @@ import MainButtons from "./components/MainButtons";
 import LoginPage from "./components/LoginPage";
 import MapPage from "./components/MapPage";
 import ComplaintPage from "./components/ComplaintPage"
+import AdminPage from './components/AdminPage';
 import "./App.css";
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
           <Route path="/login" element={<LoginPage setIsLoggedIn={setIsLoggedIn} />} />
           <Route path="/map" element={<MapPage />} />
           <Route path="/complaint" element={<ComplaintPage />} />
+          <Route path="/admin" element={<AdminPage />} />
         </Routes>
 
         <footer className="footer">© 2025 Civic Guardian</footer>
