@@ -1,35 +1,16 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import "../components/MainButton.css"; // external css
 
-function MainButtons({ isLoggedIn }) {
+function MainButtons() {
   const navigate = useNavigate();
   const [showAdminPrompt, setShowAdminPrompt] = useState(false);
   const [adminUsername, setAdminUsername] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
   const [error, setError] = useState("");
 
-  const buttonStyle = {
-    margin: "10px",
-    padding: "15px 25px",
-    fontSize: "16px",
-    fontWeight: "bold",
-    color: "white",
-    backgroundColor: "#e57f11ff",
-    border: "none",
-    borderRadius: "8px",
-    cursor: "pointer",
-  };
-
-  const handleAdminClick = () => {
-    setShowAdminPrompt(true);
-  };
-
   const handleAdminLogin = () => {
-    // Replace these with your secure credentials or logic
-    const correctUsername = "admin";
-    const correctPassword = "1234";
-
-    if (adminUsername === correctUsername && adminPassword === correctPassword) {
+    if (adminUsername === "admin" && adminPassword === "1234") {
       setError("");
       setShowAdminPrompt(false);
       navigate("/admin");
@@ -39,54 +20,51 @@ function MainButtons({ isLoggedIn }) {
   };
 
   return (
-    <div>
-      {/* Report Issue button */}
-      <button style={buttonStyle} onClick={() => navigate("/complaint")}>
-        Report Issue
-      </button>
+    <div className="container-box">
+      <h1 className="title">Civic Guardian</h1>
 
-      {/* User Login button - disabled */}
-      <button
-        style={{
-          ...buttonStyle,
-          opacity: 0.5,
-          cursor: "not-allowed",
-        }}
-        disabled
-      >
-        User Login
-      </button>
+      <div>
+        <button
+          className="btn btn-warning btn-custom"
+          onClick={() => navigate("/complaint")}
+        >
+          Report Issue
+        </button>
 
-      {/* Admin Panel button */}
-      <button style={buttonStyle} onClick={handleAdminClick}>
-        Admin Panel
-      </button>
+        <button className="btn btn-primary btn-custom" disabled>
+          User Login
+        </button>
 
-      {/* Admin Login Prompt */}
+        <button
+          className="btn btn-danger btn-custom"
+          onClick={() => setShowAdminPrompt(true)}
+        >
+          Admin Panel
+        </button>
+      </div>
+
       {showAdminPrompt && (
-        <div style={{ marginTop: "20px", border: "1px solid #ccc", padding: "15px", width: "300px" }}>
+        <div className="admin-prompt">
           <h3>Admin Login</h3>
           <input
             type="text"
             placeholder="Username"
             value={adminUsername}
             onChange={(e) => setAdminUsername(e.target.value)}
-            style={{ width: "100%", marginBottom: "10px", padding: "8px" }}
           />
           <input
             type="password"
             placeholder="Password"
             value={adminPassword}
             onChange={(e) => setAdminPassword(e.target.value)}
-            style={{ width: "100%", marginBottom: "10px", padding: "8px" }}
           />
-          {error && <p style={{ color: "red" }}>{error}</p>}
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <button style={buttonStyle} onClick={handleAdminLogin}>
+          {error && <p className="error-text">{error}</p>}
+          <div className="admin-actions">
+            <button className="btn btn-success btn-custom" onClick={handleAdminLogin}>
               Login
             </button>
             <button
-              style={{ ...buttonStyle, backgroundColor: "#999" }}
+              className="btn btn-secondary btn-custom"
               onClick={() => {
                 setShowAdminPrompt(false);
                 setError("");
@@ -97,6 +75,8 @@ function MainButtons({ isLoggedIn }) {
           </div>
         </div>
       )}
+
+      <div className="footer">© 2025 Civic Guardian</div>
     </div>
   );
 }

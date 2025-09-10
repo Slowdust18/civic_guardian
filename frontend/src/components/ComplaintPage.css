@@ -1,0 +1,20 @@
+.complaint-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.complaint-form input,
+.complaint-form textarea,
+.complaint-form select {
+  margin-bottom: 12px;
+}
+
+textarea {
+  resize: none; /* prevent ugly resize handle */
+}
+
+.ai-error {
+  color: red;
+  font-weight: 500;
+}

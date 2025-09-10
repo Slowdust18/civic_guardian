@@ -12,8 +12,6 @@ function App() {
 
   return (
     <Router>
-      <div className="app">
-        <h1 className="title">Civic Guardian</h1>
 
         <Routes>
           <Route path="/" element={<MainButtons isLoggedIn={isLoggedIn} />} />
@@ -22,9 +20,6 @@ function App() {
           <Route path="/complaint" element={<ComplaintPage />} />
           <Route path="/admin" element={<AdminPage />} />
         </Routes>
-
-        <footer className="footer">© 2025 Civic Guardian</footer>
-      </div>
     </Router>
   );
 }

@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import "../components/LoginPage.css"; // import the new CSS file
 
 function LoginPage({ setIsLoggedIn }) {
   const [formData, setFormData] = useState({
@@ -27,8 +28,8 @@ function LoginPage({ setIsLoggedIn }) {
 
     try {
       await axios.post("http://127.0.0.1:8000/users", formData);
-      setIsLoggedIn(true);   // unlock Report Issue button
-      navigate("/");          // redirect to main page
+      setIsLoggedIn(true);
+      navigate("/");
     } catch (err) {
       console.error(err);
       setErrorMsg("Failed to register. Is the backend running?");
@@ -38,13 +39,11 @@ function LoginPage({ setIsLoggedIn }) {
   };
 
   return (
-    <div style={{ padding: "20px", maxWidth: "400px" }}>
-      <h2>User Login</h2>
-      <form
-        onSubmit={handleSubmit}
-        style={{ display: "flex", flexDirection: "column", gap: "12px" }}
-      >
+    <div className="login-container">
+      <h2 className="text-center mb-4">User Login</h2>
+      <form onSubmit={handleSubmit} className="login-form">
         <input
+          className="form-control"
           name="name"
           placeholder="Name"
           value={formData.name}
@@ -52,6 +51,7 @@ function LoginPage({ setIsLoggedIn }) {
           required
         />
         <input
+          className="form-control"
           name="age"
           type="number"
           placeholder="Age"
@@ -60,6 +60,7 @@ function LoginPage({ setIsLoggedIn }) {
           required
         />
         <input
+          className="form-control"
           name="phone"
           placeholder="Phone Number"
           value={formData.phone}
@@ -67,6 +68,7 @@ function LoginPage({ setIsLoggedIn }) {
           required
         />
         <input
+          className="form-control"
           name="address"
           placeholder="Address"
           value={formData.address}
@@ -76,25 +78,17 @@ function LoginPage({ setIsLoggedIn }) {
 
         <button
           type="submit"
-          style={{
-            padding: "10px",
-            backgroundColor: "#eb8825de",
-            color: "white",
-            border: "none",
-            borderRadius: "6px",
-            cursor: "pointer",
-          }}
+          className="btn btn-warning w-100 mt-3"
           disabled={loading}
         >
           {loading ? "Submitting..." : "Submit"}
         </button>
       </form>
 
-      {errorMsg && (
-        <p style={{ color: "red", marginTop: "10px" }}>{errorMsg}</p>
-      )}
+      {errorMsg && <p className="error-message">{errorMsg}</p>}
     </div>
   );
 }
 
 export default LoginPage;
+

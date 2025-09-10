@@ -1,0 +1,19 @@
+/* src/components/LoginPage.css */
+
+.login-container {
+  padding: 20px;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.error-message {
+  color: red;
+  margin-top: 10px;
+  text-align: center;
+}
