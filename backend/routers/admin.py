@@ -4,6 +4,8 @@ from database import get_db
 import models, schemas
 from geoalchemy2.shape import to_shape
 from shapely.geometry import mapping
+from schemas import ProcessUpdate
+
 
 router = APIRouter(
     prefix="/admin",
@@ -117,3 +119,25 @@ def update_report_urgency(id: int, data: schemas.UrgencyUpdate, db: Session = De
         "location": mapping(geom) if geom else None,
         "created_at": report.created_at.isoformat() if report.created_at else None,
     }
+
+
+@router.put("/complaints/{id}/process", tags=["Admin"])
+def update_process(id: int, data: ProcessUpdate, db: Session = Depends(get_db)):
+    complaint = db.query(models.Complaint).filter(models.Complaint.id == id).first()
+    if not complaint:
+        raise HTTPException(status_code=404, detail="Complaint not found")
+    complaint.process = data.process
+    db.commit()
+    return {"message": "Process updated successfully"}
+    
+@router.put("/complaints/{id}/department")
+def update_department(id: int, data: schemas.DepartmentUpdate, db: Session = Depends(get_db)):
+    complaint = db.query(models.Complaint).filter(models.Complaint.id == id).first()
+    if not complaint:
+        raise HTTPException(status_code=404, detail="Complaint not found")
+    
+    complaint.department = data.department
+    db.commit()
+    db.refresh(complaint)
+    return {"message": "Department updated successfully"}
+

@@ -55,6 +55,25 @@ export async function adminListReports(params = {}) {
   });
   return data;
 }
+// -------------------- Admin --------------------
+export async function updateProcess(id, process) {
+  const { data } = await api.put(`/admin/complaints/${id}/process`, 
+    { process }, 
+    { headers: adminHeaders() }
+  );
+  return data;
+}
+
+export async function updateDepartment(id, department) {
+  const { data } = await api.put(
+    `/admin/complaints/${id}/department`,
+    { department },
+    { headers: adminHeaders() }
+  );
+  return data;
+}
+
+
 
 export { api };
 

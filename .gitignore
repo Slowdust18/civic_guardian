@@ -1,4 +1,5 @@
 # --- Python backend ignores ---
+backend/venv/
 backend/.venv/
 backend/uploads/
 frontend/backend/venv/
