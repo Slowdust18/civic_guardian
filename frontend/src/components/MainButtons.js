@@ -31,8 +31,10 @@ function MainButtons() {
           Report Issue
         </button>
 
-        <button className="btn btn-primary btn-custom" disabled>
+        <button className="btn btn-primary btn-custom"
+        onClick={() => navigate("/login")}>
           User Login
+          
         </button>
 
         <button

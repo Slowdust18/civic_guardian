@@ -3,11 +3,11 @@ from typing import Optional, Dict, Any, List, Literal
 from datetime import datetime
 
 class ProcessUpdate(BaseModel):
-    process: Literal["assigned", "Work has started", "pending verification", "complaint sent"] = Field(
+    process: Literal["Unassigned","Assigned", "Work has started", "Pending Verification", "Complaint Sent"] = Field(
         ..., description="Valid process status")
     
 class DepartmentUpdate(BaseModel):
-    department: Literal["Roads", "Electricity", "Sanitation", "Water","Waste"] = Field(
+    department: Literal["Road Safety", "Electricity", "Sanitation", "Water","Waste Management"] = Field(
         ..., description="Valid Department update")
 
 

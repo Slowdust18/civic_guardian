@@ -1,0 +1,149 @@
+.hero {
+  background: linear-gradient(to right, #064e3b, #065f46, #facc15);
+  min-height: 90vh;  
+  border-radius: 20px;            
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.3); 
+}
+
+
+.step-card {
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0px 3px 8px rgba(0,0,0,0.1);
+  transition: transform 0.2s;
+}
+
+.step-card:hover {
+  transform: translateY(-5px);
+}
+
+.navbar-nav .nav-link {
+  transition: color 0.2s ease-in-out;
+}
+
+.navbar-nav .nav-link:hover {
+  color: #facc15 !important;
+}
+
+html, body {
+  height: auto !important;
+  min-height: 100%;
+  overflow-x: hidden; 
+  overflow-y: auto;
+}
+
+
+body {
+  padding-top: 72px; 
+}
+
+
+.hero {
+  min-height: calc(100vh - 72px); 
+  padding: 48px 20px;             
+  display: flex;
+  align-items: center;   
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+section {
+  scroll-margin-top: 82px; 
+}
+
+
+.navbar.fixed-top, .custom-navbar {
+  z-index: 1100; 
+}
+
+
+#root, .app-root, .main-wrapper {
+  height: auto !important;
+  min-height: 100%;
+}
+
+
+.hero *, .map-container, #map {
+  overflow: visible !important;
+}
+
+
+#how {
+  padding: 80px 40px; 
+  border-radius: 20px;  
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.3); 
+}
+
+#how .container {
+  max-width: 1200px; 
+  margin: 0 auto;     
+}
+
+#how .row {
+  justify-content: center; 
+  gap: 30px;               
+}
+
+#how .step-card {
+  padding: 30px 20px; 
+}
+
+#about {
+  
+  color: #facc15; 
+  padding: 80px 20px; 
+}
+
+#about h2 {
+  color: #facc15
+}
+
+#about p {
+  color: #facc15; 
+  
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050;
+}
+
+.login-box {
+  background: #1f2937; /* dark gray */
+  padding: 2rem;
+  border-radius: 12px;
+  width: 320px;
+  color: #f9fafb;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.fade-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.login-box input {
+  width: 100%;
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: 6px;
+  border: none;
+  outline: none;
+}
+
+.login-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+}

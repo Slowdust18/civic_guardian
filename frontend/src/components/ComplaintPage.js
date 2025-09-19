@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import MapPage from "../components/MapPage";
+import MapPage from "./MapPage";
 import { submitComplaint, aiAssist } from "../api";
 import "../components/ComplaintPage.css";
 
@@ -95,6 +95,7 @@ export default function ComplaintPage() {
         category,
         department,
         image,
+        address: coords?.locationName || "", 
       });
 
       setAiSuggestions(data);
@@ -145,7 +146,6 @@ export default function ComplaintPage() {
 
       alert("Report submitted! ID: " + data.id);
 
-      // Reset form
       setTitle("");
       setDescription("");
       setCategory("");
@@ -169,7 +169,8 @@ export default function ComplaintPage() {
     <MapPage value={coords} onChange={setCoords} />
 
     <div className="d-flex my-3 gap-2">
-      <button type="button" onClick={useMyLocation} className="btn btn-primary">
+      <button type="button" onClick={useMyLocation} className="btn btn-primary" style={{backgroundColor: "#facc15", color: "#064e3b", border: "none",
+}}>
         Use My Location
       </button>
       <input
@@ -243,7 +244,7 @@ export default function ComplaintPage() {
         <button
           type="button"
           onClick={onAiAssist}
-          disabled={aiLoading}
+          disabled={aiLoading || !coords}
           className="btn btn-warning"
         >
           {aiLoading ? "AI working…" : "AI Assist"}

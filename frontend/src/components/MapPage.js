@@ -1,12 +1,17 @@
-// src/components/MapPage.js
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  useMapEvents,
+  useMap,
+} from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import axios from "axios";
 import L from "leaflet";
 
-// Default marker fix for Leaflet in React
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
@@ -16,6 +21,18 @@ L.Icon.Default.mergeOptions({
   shadowUrl:
     "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
 });
+
+function RecenterMap({ coords }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (coords?.length === 2) {
+      map.setView(coords, 15);
+    }
+  }, [coords, map]);
+
+  return null;
+}
 
 function MapPage({ value, onChange }) {
   const navigate = useNavigate();
@@ -28,13 +45,12 @@ function MapPage({ value, onChange }) {
       .catch((err) => console.error(err));
   }, []);
 
-  // Component to handle map click events
   function LocationSelector() {
     useMapEvents({
       click(e) {
         onChange({
           coords: [e.latlng.lat, e.latlng.lng],
-          locationName: "Selected Location", // Optional: reverse geocode later
+          locationName: "Selected Location",
         });
       },
     });
@@ -43,30 +59,28 @@ function MapPage({ value, onChange }) {
 
   return (
     <div style={{ height: "100vh", width: "100%" }}>
-      {/* Back button */}
       <button
         onClick={() => navigate(-1)}
         style={{
           margin: "10px",
           padding: "10px 15px",
-          backgroundColor: "#f97316",
-          color: "white",
+          backgroundColor: "#edc10fff",
+          color: "green",
           border: "none",
           borderRadius: "6px",
           cursor: "pointer",
         }}
       >
-        ⬅ Back
+       Back
       </button>
 
       <MapContainer
-        center={value?.coords || [13.08, 80.22]} // Use selected coords if available
+        center={value?.coords || [13.08, 80.22]}
         zoom={13}
         style={{ height: "90%", width: "100%" }}
       >
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
-        {/* Complaint markers */}
         {complaints.map((c) => {
           if (!c.location || !c.location.coordinates) return null;
           const [lng, lat] = c.location.coordinates; // GeoJSON = [lon, lat]
@@ -85,11 +99,11 @@ function MapPage({ value, onChange }) {
           );
         })}
 
-        {/* Marker for selected location */}
         {value?.coords && <Marker position={value.coords} />}
 
-        {/* Click handler */}
         <LocationSelector />
+        
+        <RecenterMap coords={value?.coords} />
       </MapContainer>
     </div>
   );

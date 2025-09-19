@@ -93,7 +93,7 @@ def update_complaint(
     db.refresh(complaint)
 
     geom = to_shape(complaint.location) if complaint.location else None
-@router.put("/reports/{id}/urgency")
+@router.put("/complaints/{id}/urgency")
 def update_report_urgency(id: int, data: schemas.UrgencyUpdate, db: Session = Depends(get_db)):
     report = db.query(models.Complaint).filter(models.Complaint.id == id).first()
     if not report:

@@ -24,13 +24,14 @@ def _system_prompt():
         "Always return valid JSON. Never leave fields empty."
     )
 
-def _user_prompt(title, description, category, department, urgency):
+def _user_prompt(title, description, category, department, urgency,address):
     payload = {
         "title": title or "",
         "description": description or "",
         "category_hint": category or "",
         "department_hint": department or "",
         "urgency_hint": urgency or "",
+        "address_hint": address or "", 
     }
     return (
         "The user provided this partial report JSON:\n\n"
@@ -39,6 +40,7 @@ def _user_prompt(title, description, category, department, urgency):
         "The main 'description' must be between 4 and 8 full sentences, realistic and specific to the civic issue. "
         "The 'descriptions' array must contain exactly 4 alternative versions, each 4–8 sentences long, not copies. "
         "If description is missing or empty, invent a plausible and detailed one."
+         "If 'address' is present, integrate it naturally into the main description."
     )
 
 
@@ -48,30 +50,35 @@ async def ai_assist(
     description: Optional[str] = Form(default=None),
     category: Optional[str] = Form(default=None),
     department: Optional[str] = Form(default=None),
+    address: Optional[str] = Form(default=None),   # Added address
 ):
-    logger.info("AI Assist endpoint hit")
-    logger.info(f"title={title}, description={description}, category={category}, department={department}")
-    ...
+    logger.info(
+        f"AI Assist hit with title={title}, description={description}, "
+        f"category={category}, department={department}, address={address}"
+    )
+
+    # Always have a fallback ready
+    fallback_desc = description or title or "This issue requires municipal attention."
+    long_fallback = (
+        f"{fallback_desc}. It continues to inconvenience residents, "
+        "may worsen if ignored, and needs timely municipal intervention."
+    )
+
     messages = [
         {"role": "system", "content": _system_prompt()},
-        {"role": "user", "content": _user_prompt(title, description, category, department, None)},
+        {"role": "user", "content": _user_prompt(title, description, category, department, None,address)},
     ]
 
     try:
         completion = groq_client.chat.completions.create(
             model=settings.GROQ_MODEL,
             messages=messages,
-            temperature=0.4,  # lower = more consistent output
+            temperature=0.4,
             response_format={"type": "json_object"},
         )
         obj = json.loads(completion.choices[0].message.content)
     except Exception as e:
-        # Fallback in case Groq fails
-        fallback_desc = description or title or "This issue requires municipal attention."
-        long_fallback = (
-            f"{fallback_desc}. It continues to inconvenience residents, "
-            "may worsen if ignored, and needs timely municipal intervention."
-        )
+        logger.error(f"Groq failed: {e}")
         obj = {
             "inferred_title": title or "Issue Report",
             "description": long_fallback,
