@@ -18,6 +18,7 @@ def _system_prompt():
         "You are an AI assistant for a civic issue reporting app. "
         "Given partial issue details, output valid JSON with these keys: "
         "inferred_title, description (4–8 sentences), descriptions (4 alternatives), "
+        "Include location given"
         "suggested_category [potholes, electricity, water, waste, parks, govt buildings, bridges], "
         "suggested_department [ROADS, ELECTRICITY, WATER, WASTE, PARKS, GOVT BUILDINGS], "
         "and tags (2–5 keywords). "

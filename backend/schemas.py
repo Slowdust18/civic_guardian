@@ -78,3 +78,9 @@ class UserOut(BaseModel):
 # Schema for updating urgency (priority)
 class UrgencyUpdate(BaseModel):
     urgency: Literal['LOW', 'MEDIUM', 'HIGH']
+
+from pydantic import BaseModel
+
+class VoteCreate(BaseModel):
+    user_id: int
+    vote_type: str  # "verified" or "not_verified"

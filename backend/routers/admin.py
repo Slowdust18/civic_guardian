@@ -1,11 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, Query
 from sqlalchemy.orm import Session
 from database import get_db
 import models, schemas
 from geoalchemy2.shape import to_shape
 from shapely.geometry import mapping
 from schemas import ProcessUpdate
-
+from models import Complaint
+from sqlalchemy import func
+from sqlalchemy import or_
 
 router = APIRouter(
     prefix="/admin",
@@ -140,4 +142,63 @@ def update_department(id: int, data: schemas.DepartmentUpdate, db: Session = Dep
     db.commit()
     db.refresh(complaint)
     return {"message": "Department updated successfully"}
+
+@router.get("/filter", response_model=None)  # <-- Disable Pydantic inference
+def filter_complaints(
+    db: Session = Depends(get_db),
+    department: str = None,
+    process: str = None,
+    status: str = None,
+    priority: str = None,
+    partial: bool = True
+):
+    query = db.query(Complaint)
+
+    if department:
+        query = query.filter(Complaint.department == department)
+
+    if process:
+        if partial:
+            query = query.filter(Complaint.process.ilike(f"%{process}%"))
+        else:
+            query = query.filter(
+                func.coalesce(func.lower(func.trim(Complaint.process)), '') == process.strip().lower()
+            )
+
+    if status:
+        if partial:
+            query = query.filter(Complaint.status.ilike(f"%{status}%"))
+        else:
+            query = query.filter(
+                func.coalesce(func.lower(func.trim(Complaint.status)), '') == status.strip().lower()
+            )
+
+    if priority:
+        if partial:
+            query = query.filter(Complaint.priority.ilike(f"%{priority}%"))
+        else:
+            query = query.filter(
+                func.coalesce(func.lower(func.trim(Complaint.priority)), '') == priority.strip().lower()
+            )
+
+    complaints = query.all()
+
+    result = []
+    for c in complaints:
+        geom = to_shape(c.location) if c.location else None
+        result.append({
+            "id": c.id,
+            "title": c.title,
+            "description": c.description,
+            "department": c.department,
+            "status": c.status,
+            "priority": c.priority,
+            "process": c.process,
+            "image_url": c.image_url,
+            "location": mapping(geom) if geom else None,
+            "created_at": c.created_at.isoformat() if c.created_at else None,
+            "locationName": c.locationName
+        })
+
+    return result
 
