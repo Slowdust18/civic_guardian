@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, ForeignKey, TIMESTAMP, func, Boolean, DateTime, UniqueConstraint
+from sqlalchemy import Column, Integer, String, Text, ForeignKey, TIMESTAMP, func, Boolean, DateTime, UniqueConstraint, Float
 from sqlalchemy.dialects.postgresql import TEXT
 from sqlalchemy.orm import relationship
 from geoalchemy2 import Geography
@@ -19,6 +19,8 @@ class Complaint(Base):
     locationName = Column("locationName", String, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     process= Column(String, nullable=True) # unassigned, assigned, in_progress, pending_verification
+    score = Column(Float, nullable=False, default=0, server_default='0') # <-- ADD THIS LINE
+
     user = relationship("User", back_populates="complaints")
     votes = relationship("Vote", back_populates="complaint")
 class User(Base):
