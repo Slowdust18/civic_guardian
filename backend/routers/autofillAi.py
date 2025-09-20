@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, Form
+from fastapi import APIRouter, UploadFile, File, Form
 from fastapi.responses import JSONResponse
 from groq import Groq
 from config import settings
@@ -6,80 +6,84 @@ from typing import Optional
 import json
 from schemas import AIResponse
 import logging
+from image_classifier import predict_issue_from_image_tf
+
 logger = logging.getLogger(__name__)
-router = APIRouter(
-    tags=["AIhelp"])
+router = APIRouter(tags=["AIhelp"])
 
 # Initialize Groq client
 groq_client = Groq(api_key=settings.GROQ_API_KEY)
 
 def _system_prompt():
+    """Sets the instructions for the language model."""
     return (
         "You are an AI assistant for a civic issue reporting app. "
-        "Given partial issue details, output valid JSON with these keys: "
-        "inferred_title, description (4–8 sentences), descriptions (4 alternatives), "
-        "Include location given"
-        "suggested_category [potholes, electricity, water, waste, parks, govt buildings, bridges], "
-        "suggested_department [ROADS, ELECTRICITY, WATER, WASTE, PARKS, GOVT BUILDINGS], "
-        "and tags (2–5 keywords). "
-        "Always return valid JSON. Never leave fields empty."
+        "Based on hints, generate a detailed report in valid JSON format. "
+        "The JSON must include these keys: 'inferred_title', 'description' (3-4 sentences), "
+        "'descriptions' (an array of 4 alternatives), 'suggested_category', 'suggested_department', and 'tags' (2-5 keywords). "
+        "The 'suggested_category' and 'suggested_department' should strongly reflect the hints provided."
+        "The only allowed categories and departments are roads, bridges, electricity, water, govt buildings, parks, solid waste"
     )
 
-def _user_prompt(title, description, category, department, urgency):
-    payload = {
-        "title": title or "",
-        "description": description or "",
-        "category_hint": category or "",
-        "department_hint": department or "",
-        "urgency_hint": urgency or "",
+def _user_prompt(title: Optional[str], description: Optional[str], department_from_image: Optional[str]):
+    """Creates the prompt with context for the language model."""
+    hints = {
+        "user_title_hint": title or "",
+        "user_description_hint": description or "",
+        "department_hint_from_image_analysis": department_from_image or "not available",
     }
     return (
-        "The user provided this partial report JSON:\n\n"
-        f"{json.dumps(payload, ensure_ascii=False)}\n\n"
-        "Now generate a completed JSON with ALL required fields filled. "
-        "The main 'description' must be between 4 and 8 full sentences, realistic and specific to the civic issue. "
-        "The 'descriptions' array must contain exactly 4 alternative versions, each 4–8 sentences long, not copies. "
-        "If description is missing or empty, invent a plausible and detailed one."
+        "Generate a complete civic issue report based on the following hints:\n\n"
+        f"{json.dumps(hints, ensure_ascii=False)}\n\n"
+        "Ensure the generated description is detailed and specific to the identified issue."
     )
-
 
 @router.post("/AIhelp/assist", response_model=AIResponse)
 async def ai_assist(
     title: Optional[str] = Form(default=None),
     description: Optional[str] = Form(default=None),
-    category: Optional[str] = Form(default=None),
-    department: Optional[str] = Form(default=None),
+    image: Optional[UploadFile] = File(default=None),
 ):
     logger.info("AI Assist endpoint hit")
-    logger.info(f"title={title}, description={description}, category={category}, department={department}")
-    ...
+    
+    # --- 1. Get Department Prediction from the Image (if provided) ---
+    predicted_department = None
+    if image and image.filename:
+        logger.info(f"Image uploaded: {image.filename}, running TF model...")
+        image_bytes = await image.read()
+        predicted_department = predict_issue_from_image_tf(image_bytes)
+        logger.info(f"TF Model Prediction -> Department: {predicted_department}")
+
+    # --- 2. Call Language Model with Enhanced Context ---
     messages = [
         {"role": "system", "content": _system_prompt()},
-        {"role": "user", "content": _user_prompt(title, description, category, department, None)},
+        {"role": "user", "content": _user_prompt(title, description, predicted_department)},
     ]
 
     try:
         completion = groq_client.chat.completions.create(
             model=settings.GROQ_MODEL,
             messages=messages,
-            temperature=0.4,  # lower = more consistent output
+            temperature=0.4,
             response_format={"type": "json_object"},
         )
         obj = json.loads(completion.choices[0].message.content)
+
+        # Ensure the department from our superior TF model is used if the LLM misses it
+        if not obj.get("suggested_department") and predicted_department:
+            obj["suggested_department"] = predicted_department
+
     except Exception as e:
-        # Fallback in case Groq fails
-        fallback_desc = description or title or "This issue requires municipal attention."
-        long_fallback = (
-            f"{fallback_desc}. It continues to inconvenience residents, "
-            "may worsen if ignored, and needs timely municipal intervention."
-        )
+        logger.error(f"Groq API call failed: {e}")
+        # --- 3. Smart Fallback Logic ---
+        fallback_desc = description or title or "This issue requires municipal attention and timely intervention."
         obj = {
             "inferred_title": title or "Issue Report",
-            "description": long_fallback,
-            "descriptions": [f"{long_fallback} (Alt {i+1})" for i in range(4)],
-            "suggested_category": category or "potholes",
-            "suggested_department": department or "ROADS",
-            "tags": ["general"],
+            "description": fallback_desc,
+            "descriptions": [f"{fallback_desc} (Alt {i+1})" for i in range(4)],
+            "suggested_category": "general",
+            "suggested_department": predicted_department or "unassigned",
+            "tags": [predicted_department] if predicted_department else ["general"],
         }
 
     return AIResponse(**obj)

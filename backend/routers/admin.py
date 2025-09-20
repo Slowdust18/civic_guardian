@@ -8,6 +8,7 @@ from schemas import ProcessUpdate
 from models import Complaint
 from sqlalchemy import func
 from sqlalchemy import or_
+import ranking_service
 
 router = APIRouter(
     prefix="/admin",
@@ -202,3 +203,37 @@ def filter_complaints(
 
     return result
 
+
+@router.get("/complaints/ranked")
+def get_ranked_complaints(request: Request, db: Session = Depends(get_db)):
+    """
+    Gets all unresolved complaints, calculates a priority score for each,
+    and returns them sorted from most to least critical.
+    """
+    unresolved_complaints = db.query(models.Complaint).filter(models.Complaint.status != 'resolved').all()
+    
+    ranked_list = []
+    for c in unresolved_complaints:
+        score = ranking_service.calculate_priority_score(c, db)
+        
+        geom = to_shape(c.location) if c.location else None
+        img_path = c.image_url.lstrip("/") if c.image_url else None
+        image_url = str(request.base_url) + img_path if img_path else None
+
+        ranked_list.append({
+            "score": score,
+            "id": c.id,
+            "title": c.title,
+            "description": c.description,
+            "department": c.department,
+            "status": c.status,
+            "image_url": image_url,
+            "location": mapping(geom) if geom else None,
+            "locationName": c.locationName,
+            "created_at": c.created_at.isoformat() if c.created_at else None,
+        })
+
+    # Sort the final list by score, with the highest score first
+    ranked_list.sort(key=lambda x: x['score'], reverse=True)
+    
+    return ranked_list
