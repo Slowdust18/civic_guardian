@@ -32,7 +32,7 @@ export async function submitComplaint(payload) {
 }
 
 // -------------------- AI Assist --------------------
-export async function aiAssist({ title, description, category, department, urgency, image }) {
+export async function aiAssist({ title, description, category, department, urgency, image, address }) {
   const fd = new FormData();
   if (title) fd.append("title", title);
   if (description) fd.append("description", description);
@@ -40,12 +40,14 @@ export async function aiAssist({ title, description, category, department, urgen
   if (department) fd.append("department", department);
   if (urgency) fd.append("urgency", urgency);
   if (image) fd.append("image", image);
+  if (address) fd.append("address", address); // ✅ new line
 
   const { data } = await api.post(`/AIhelp/assist`, fd, {
     headers: { "Content-Type": "multipart/form-data" },
   });
-  return data;
+  return data
 }
+
 
 // -------------------- Admin --------------------
 export async function adminListReports(params = {}) {

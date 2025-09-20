@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import MapPage from "../components/MapPage";
+import MapPage from "./MapPage";
 import { submitComplaint, aiAssist } from "../api";
 import "../components/ComplaintPage.css";
 
@@ -27,56 +27,12 @@ export default function ComplaintPage() {
   const [aiError, setAiError] = useState("");
   const [aiSuggestions, setAiSuggestions] = useState(null);
   const [descriptionIndex, setDescriptionIndex] = useState(0);
-
-  // 🎤 Voice to Text
-  const [listening, setListening] = useState(false);
-
   useEffect(() => {
     if (coords?.coords?.length === 2) {
       setLatInput(coords.coords[0].toString());
       setLngInput(coords.coords[1].toString());
     }
   }, [coords]);
-
-  const startListening = async () => {
-  if (!navigator.mediaDevices) return alert("Audio recording not supported");
-
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const mediaRecorder = new MediaRecorder(stream);
-    const audioChunks = [];
-
-    mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
-
-    mediaRecorder.onstop = async () => {
-      setListening(false);
-      const blob = new Blob(audioChunks, { type: "audio/wav" });
-      const formData = new FormData();
-      formData.append("audio", blob, "recording.wav");
-
-      try {
-        const res = await fetch("http://localhost:5000/api/transcribe", {
-          method: "POST",
-          body: formData,
-        });
-        const data = await res.json();
-        setTitle((prev) => prev + " " + data.transcript);
-      } catch (err) {
-        console.error(err);
-        alert("Transcription failed. Try again.");
-      }
-    };
-
-    mediaRecorder.start();
-    setListening(true);
-
-    // Stop recording automatically after 5 seconds
-    setTimeout(() => mediaRecorder.stop(), 5000);
-  } catch (err) {
-    console.error(err);
-    alert("Microphone access denied or not supported.");
-  }
-};
 
   const useMyLocation = () => {
     if (!navigator.geolocation) return alert("Geolocation not supported");
@@ -123,6 +79,7 @@ export default function ComplaintPage() {
     setCoords({ coords: [lat, lng], locationName });
   };
 
+
   const onAiAssist = async () => {
     if (!title && !description && !category && !department && !image) {
       return alert("Provide at least one input for AI to assist");
@@ -138,6 +95,7 @@ export default function ComplaintPage() {
         category,
         department,
         image,
+        address: coords?.locationName || "", 
       });
 
       setAiSuggestions(data);
@@ -188,7 +146,6 @@ export default function ComplaintPage() {
 
       alert("Report submitted! ID: " + data.id);
 
-      // Reset form
       setTitle("");
       setDescription("");
       setCategory("");
@@ -206,136 +163,129 @@ export default function ComplaintPage() {
   };
 
   return (
-    <div className="complaint-container">
-      <h1 className="text-center mb-4">Report an Issue</h1>
+  <div className="complaint-container">
+    <h1 className="text-center mb-4">Report an Issue</h1>
 
-      <MapPage value={coords} onChange={setCoords} />
+    <MapPage value={coords} onChange={setCoords} />
 
-      <div className="d-flex my-3 gap-2">
-        <button type="button" onClick={useMyLocation} className="btn btn-primary">
-          Use My Location
-        </button>
-        <input
-          type="text"
-          placeholder="Latitude"
-          value={latInput}
-          onChange={(e) => setLatInput(e.target.value)}
-          className="form-control w-25"
-        />
-        <input
-          type="text"
-          placeholder="Longitude"
-          value={lngInput}
-          onChange={(e) => setLngInput(e.target.value)}
-          className="form-control w-25"
-        />
-        <button type="button" onClick={handleManualCoords} className="btn btn-secondary">
-          Set Location
-        </button>
+    <div className="d-flex my-3 gap-2">
+      <button type="button" onClick={useMyLocation} className="btn btn-primary" style={{backgroundColor: "#facc15", color: "#064e3b", border: "none",
+}}>
+        Use My Location
+      </button>
+      <input
+        type="text"
+        placeholder="Latitude"
+        value={latInput}
+        onChange={(e) => setLatInput(e.target.value)}
+        className="form-control w-25"
+      />
+      <input
+        type="text"
+        placeholder="Longitude"
+        value={lngInput}
+        onChange={(e) => setLngInput(e.target.value)}
+        className="form-control w-25"
+      />
+      <button type="button" onClick={handleManualCoords} className="btn btn-secondary">
+        Set Location
+      </button>
+    </div>
+
+    <form onSubmit={onSubmit} className="complaint-form">
+      <input
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        placeholder="Title (optional)"
+        className="form-control"
+      />
+      <textarea
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        placeholder="Describe the issue clearly"
+        rows={5}
+        className="form-control"
+      />
+      <div className="row">
+        <div className="col-md-6">
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className="form-select"
+          >
+            <option value="">Category (optional)</option>
+            {CATEGORIES.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="col-md-6">
+          <input
+            value={department}
+            onChange={(e) => setDepartment(e.target.value)}
+            placeholder="Department (AI can fill)"
+            className="form-control"
+          />
+        </div>
       </div>
 
-      <form onSubmit={onSubmit} className="complaint-form">
-        <input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Title (optional)"
-          className="form-control"
-        />
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Describe the issue clearly"
-          rows={5}
-          className="form-control"
-        />
-        <div className="row">
-          <div className="col-md-6">
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="form-select"
-            >
-              <option value="">Category (optional)</option>
-              {CATEGORIES.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="col-md-6">
-            <input
-              value={department}
-              onChange={(e) => setDepartment(e.target.value)}
-              placeholder="Department (AI can fill)"
-              className="form-control"
-            />
-          </div>
-        </div>
+      <input
+        type="file"
+        accept="image/*"
+        onChange={(e) => setImage(e.target.files?.[0] || null)}
+        className="form-control"
+      />
 
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => setImage(e.target.files?.[0] || null)}
-          className="form-control"
-        />
+      {aiError && <p className="ai-error">{aiError}</p>}
 
-        {aiError && <p className="ai-error">{aiError}</p>}
+      <div className="d-flex gap-2 mt-2">
+        <button
+          type="button"
+          onClick={onAiAssist}
+          disabled={aiLoading || !coords}
+          className="btn btn-warning"
+        >
+          {aiLoading ? "AI working…" : "AI Assist"}
+        </button>
+        <button
+          type="button"
+          onClick={onRefreshDescription}
+          disabled={aiLoading || !aiSuggestions?.descriptions}
+          className="btn btn-info"
+        >
+          Refresh Description
+        </button>
+        <button type="submit" className="btn btn-success">
+          Submit
+        </button>
+      </div>
+    </form>
+    
 
-        <div className="d-flex gap-2 mt-2">
-          <button
-            type="button"
-            onClick={onAiAssist}
-            disabled={aiLoading}
-            className="btn btn-warning"
-          >
-            {aiLoading ? "AI working…" : "AI Assist"}
-          </button>
-          <button
-            type="button"
-            onClick={onRefreshDescription}
-            disabled={aiLoading || !aiSuggestions?.descriptions}
-            className="btn btn-info"
-          >
-            Refresh Description
-          </button>
-          {/* 🎤 Voice-to-text button */}
-          <button
-            type="button"
-            onClick={startListening}
-            className={`btn ${listening ? "btn-danger" : "btn-outline-primary"}`}
-          >
-            {listening ? "Listening…" : "🎤 Speak"}
-          </button>
-          <button type="submit" className="btn btn-success">
-            Submit
-          </button>
-        </div>
-      </form>
+    {coords?.coords && (
+      <div className="mt-3">
+        <p>
+          <b>Selected Location:</b> {coords.coords[0]}, {coords.coords[1]} <br />
+          <b>Address:</b> {coords.locationName}
+        </p>
+      </div>
+    )}
 
-      {coords?.coords && (
-        <div className="mt-3">
-          <p>
-            <b>Selected Location:</b> {coords.coords[0]}, {coords.coords[1]} <br />
-            <b>Address:</b> {coords.locationName}
-          </p>
-        </div>
-      )}
-
-      {aiSuggestions && (
-        <div className="mt-3">
-          {aiSuggestions.inferred_title && (
-            <p><b>AI Title:</b> {aiSuggestions.inferred_title}</p>
-          )}
-          {aiSuggestions.suggested_department && (
-            <p><b>AI Department:</b> {aiSuggestions.suggested_department}</p>
-          )}
-          {aiSuggestions.tags?.length > 0 && (
-            <p><b>AI Tags:</b> {aiSuggestions.tags.join(", ")}</p>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
+    {aiSuggestions && (
+      <div className="mt-3">
+        {aiSuggestions.inferred_title && (
+          <p><b>AI Title:</b> {aiSuggestions.inferred_title}</p>
+        )}
+        {aiSuggestions.suggested_department && (
+          <p><b>AI Department:</b> {aiSuggestions.suggested_department}</p>
+        )}
+        {aiSuggestions.tags?.length > 0 && (
+          <p><b>AI Tags:</b> {aiSuggestions.tags.join(", ")}</p>
+        )}
+      </div>
+    )}
+  </div>
+);}
 

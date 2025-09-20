@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     ADMIN_TOKEN: Optional[str] = None
     GROQ_API_KEY: str
     GROQ_MODEL: str = "llama-3.3-70b-versatile"
+    OPENAI_API_KEY: str
 
     STATIC_DIR: str = "static"
     UPLOAD_DIR: str = "static/uploads"

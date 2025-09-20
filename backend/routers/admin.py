@@ -5,9 +5,10 @@ import models, schemas
 from geoalchemy2.shape import to_shape
 from shapely.geometry import mapping
 from schemas import ProcessUpdate
-from models import Complaint
+from models import Complaint, VerifiedIssue
 from sqlalchemy import func
 from sqlalchemy import or_
+from schemas import StatusUpdate
 import ranking_service
 
 router = APIRouter(
@@ -96,7 +97,7 @@ def update_complaint(
     db.refresh(complaint)
 
     geom = to_shape(complaint.location) if complaint.location else None
-@router.put("/reports/{id}/urgency")
+@router.put("/complaints/{id}/urgency")
 def update_report_urgency(id: int, data: schemas.UrgencyUpdate, db: Session = Depends(get_db)):
     report = db.query(models.Complaint).filter(models.Complaint.id == id).first()
     if not report:
@@ -143,6 +144,36 @@ def update_department(id: int, data: schemas.DepartmentUpdate, db: Session = Dep
     db.commit()
     db.refresh(complaint)
     return {"message": "Department updated successfully"}
+
+
+@router.put("/complaints/{id}/status")
+def update_status(id: int, data: StatusUpdate, db: Session = Depends(get_db)):
+    complaint = db.query(models.Complaint).filter(models.Complaint.id == id).first()
+    if not complaint:
+        raise HTTPException(status_code=404, detail="Complaint not found")
+    
+    complaint.status = data.status
+    db.commit()
+    db.refresh(complaint)
+    if data.status == "Resolved":
+        existing = db.query(VerifiedIssue).filter(VerifiedIssue.complaint_id == id).first()
+        if not existing:
+            verified = VerifiedIssue(
+                complaint_id=complaint.id,
+                title=complaint.title,
+                description=complaint.description,
+                department=complaint.department,
+                priority=complaint.priority,
+                locationName=complaint.locationName,
+            )
+            db.add(verified)
+            db.commit()
+            db.refresh(verified)
+    return {"message": "Status updated successfully", "status": complaint.status}
+
+
+
+
 
 @router.get("/filter", response_model=None)  # <-- Disable Pydantic inference
 def filter_complaints(
@@ -202,7 +233,6 @@ def filter_complaints(
         })
 
     return result
-
 
 @router.get("/complaints/ranked")
 def get_ranked_complaints(request: Request, db: Session = Depends(get_db)):

@@ -1,14 +1,19 @@
 from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, Dict, Any, List, Literal
-from datetime import datetime
+from datetime import datetime 
+from enum import Enum
 
 class ProcessUpdate(BaseModel):
-    process: Literal["assigned", "Work has started", "pending verification", "complaint sent"] = Field(
+    process: Literal["Unassigned","Assigned", "Work has started", "Pending Verification", "Complaint Sent"] = Field(
         ..., description="Valid process status")
     
 class DepartmentUpdate(BaseModel):
-    department: Literal["Roads", "Electricity", "Sanitation", "Water","Waste"] = Field(
+    department: Literal["Road Safety", "Electricity", "Sanitation", "Water","Waste Management"] = Field(
         ..., description="Valid Department update")
+    
+class StatusUpdate(BaseModel):
+    status: Literal["Unresolved","Resolved"] = Field(
+        ..., description="Valid Status update")
 
 
 class AIResponse(BaseModel):
@@ -79,8 +84,26 @@ class UserOut(BaseModel):
 class UrgencyUpdate(BaseModel):
     urgency: Literal['LOW', 'MEDIUM', 'HIGH']
 
-from pydantic import BaseModel
+class VoteType(str, Enum):
+    resolved = "Resolved"
+    unresolved = "Unresolved"
 
 class VoteCreate(BaseModel):
     user_id: int
     vote_type: str  # "verified" or "not_verified"
+
+    class VerifiedIssueOut(BaseModel):
+     id: int
+    complaint_id: int
+    user_id: int
+    title: str
+    description: str
+    department: str
+    priority: str | None
+    process: str | None
+    locationName: str | None
+    image_url: str | None
+    verified_at: datetime
+
+    class Config:
+        from_attributes = True
