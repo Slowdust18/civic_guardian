@@ -27,7 +27,6 @@ export default function ComplaintPage() {
   const [aiError, setAiError] = useState("");
   const [aiSuggestions, setAiSuggestions] = useState(null);
   const [descriptionIndex, setDescriptionIndex] = useState(0);
-
   useEffect(() => {
     if (coords?.coords?.length === 2) {
       setLatInput(coords.coords[0].toString());
@@ -79,6 +78,7 @@ export default function ComplaintPage() {
 
     setCoords({ coords: [lat, lng], locationName });
   };
+
 
   const onAiAssist = async () => {
     if (!title && !description && !category && !department && !image) {
@@ -262,6 +262,7 @@ export default function ComplaintPage() {
         </button>
       </div>
     </form>
+    
 
     {coords?.coords && (
       <div className="mt-3">

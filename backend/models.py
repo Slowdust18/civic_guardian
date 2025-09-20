@@ -12,7 +12,7 @@ class Complaint(Base):
     title = Column(String, nullable=False)
     description = Column(String, nullable=False)
     department = Column(String, nullable=True)   # can be empty at first
-    status = Column(String, default="unassigned")  # unresolved and resolved
+    status = Column(String, default="Unresolved")  # unresolved and resolved
     priority = Column(String, default="none")      # none, low, medium, high
     image_url = Column(String, nullable=True)
     location = Column(Geography(geometry_type="POINT", srid=4326))
@@ -46,6 +46,7 @@ class Vote(Base):
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     complaint_id = Column(Integer, ForeignKey("complaints.id", ondelete="CASCADE"), nullable=False)
     voted_at = Column(DateTime(timezone=True), server_default=func.now())
+    vote_type = Column(String(20), nullable=False, default="resolved") 
 
     # relationships
     user = relationship("User", back_populates="votes")
@@ -55,3 +56,16 @@ class Vote(Base):
         UniqueConstraint("user_id", "complaint_id", name="unique_user_complaint_vote"),
     )
 
+class VerifiedIssue(Base):
+    __tablename__ = "verified_issues"
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    complaint_id = Column(Integer, nullable=False, unique=True)  
+    title = Column(String(200), nullable=False)
+    description = Column(Text, nullable=False)
+    department = Column(String(100))
+    status = Column(String(50))
+    priority = Column(String(50))
+    location = Column(Geography(geometry_type="POINT", srid=4326))
+    locationName = Column(String(200))
+    created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())

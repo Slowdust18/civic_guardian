@@ -6,7 +6,9 @@ import traceback
 
 from database import Base, engine
 import models
-from routers import complaints, admin, user, votes, autofillAi
+from routers import complaints, admin, user, votes, autofillAi, resolved
+from dotenv import load_dotenv
+
 
 app = FastAPI()
 
@@ -46,3 +48,4 @@ app.include_router(admin.router)
 app.include_router(user.router)
 app.include_router(votes.router)
 app.include_router(autofillAi.router)
+app.include_router(resolved.router)

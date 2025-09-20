@@ -2,11 +2,10 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
-import "./LandingPage.css"; // your CSS file
+import "./LandingPage.css";
+import VotingTemp from "./VotingTemp";
 
-
-function LandingPage({ isLoggedIn }) {
-
+function LandingPage({ isLoggedIn, setIsLoggedIn }) {
   const [showLogin, setShowLogin] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -19,11 +18,18 @@ function LandingPage({ isLoggedIn }) {
       setUsername("");
       setPassword("");
       setError("");
-      navigate("/admin")
+      navigate("/admin");
     } else {
       setError("❌ Invalid username or password");
     }
   };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    localStorage.removeItem("isLoggedIn"); // clear persistence
+    navigate("/"); // send back to landing page
+  };
+
   return (
     <>
       {/* Navbar */}
@@ -52,50 +58,79 @@ function LandingPage({ isLoggedIn }) {
                   How It Works
                 </a>
               </li>
-             <li className="nav-item">
-            <button
-    className="btn btn-warning text-dark ms-2 fw-semibold"
-    onClick={() => setShowLogin(true)}
-  >
-    Admin Login
-  </button>
-  </li>
 
+              {!isLoggedIn ? (
+                <li className="nav-item">
+                  <button
+                    className="btn btn-warning text-dark ms-2 fw-semibold"
+                    onClick={() => setShowLogin(true)}
+                  >
+                    Admin Login
+                  </button>
+                </li>
+              ) : (
+                <li className="nav-item">
+                  <button
+                    className="btn btn-danger text-light ms-2 fw-semibold"
+                    onClick={handleLogout}
+                  >
+                    Logout
+                  </button>
+                </li>
+              )}
             </ul>
           </div>
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className="hero text-center">
-        <div className="container">
-          <h1 className="display-4 text-light">
-            <span className="text-warning">Civic</span> Guardian
-          </h1>
-          <p className="lead mb-4 text-light">
-            Civic Guardian helps citizens report with{" "}
-            <span style={{ color: "yellow" }}>AI assistance</span> and track
-            civic issues with ease.
-          </p>
-          <a href="/complaint" className="btn btn-warning btn-lg me-2">
-            <i className="fa-solid fa-pen-to-square"></i> Report Issue
-          </a>
-         {!isLoggedIn && (
-  <a href="/login" className="btn btn-primary btn-lg" style={{ color: "#facc15" }}>
-    <i className="fa-solid fa-user"></i> User Sign Up
-  </a>)}
-        </div>
-      </section>
+<section className="hero text-center">
+  <div className="container">
+    <h1 className="display-4 text-light">
+      <span className="text-warning">Civic</span> Guardian
+    </h1>
+    <p className="lead mb-4 text-light">
+      Civic Guardian helps citizens report with{" "}
+      <span style={{ color: "yellow" }}>AI assistance</span> and track
+      civic issues with ease.
+    </p>
+
+    {/* Report Issue always visible */}
+    <a href="/complaint" className="btn btn-warning btn-lg me-2">
+      <i className="fa-solid fa-pen-to-square"></i> Report Issue
+    </a>
+
+    {/* Show Sign Up when not logged in */}
+    {!isLoggedIn && (
+      <a
+        href="/login"
+        className="btn btn-primary btn-lg me-2"
+        style={{ color: "#facc15" }}
+      >
+        <i className="fa-solid fa-user"></i> User Sign Up
+      </a>
+    )}
+
+    {/* Show Vote button when logged in */}
+    {isLoggedIn && (
+      <a href="/vote" className="btn btn-outline-warning btn-lg">
+        🗳️ Vote on Issues
+      </a>
+    )}
+  </div>
+</section>
+
 
       {/* About Section */}
       <section id="about" className="py-5 text-center">
         <div className="container">
           <h2 className="fw-bold mb-4">About Civic Guardian</h2>
           <p className="text-muted">
-           <span style={{color: "white"}}> We empower citizens to report civic issues like potholes, garbage,
-            street lights with{" "}
-            <span style={{ color: "yellow" }}>AI assistance</span> and track them
-            until resolved. Together we build better communities.</span>
+            <span style={{ color: "white" }}>
+              We empower citizens to report civic issues like potholes, garbage,
+              street lights with{" "}
+              <span style={{ color: "yellow" }}>AI assistance</span> and track
+              them until resolved. Together we build better communities.
+            </span>
           </p>
         </div>
       </section>
@@ -137,6 +172,8 @@ function LandingPage({ isLoggedIn }) {
         </div>
       </section>
 
+
+
       {/* Footer */}
       <footer className="text-center footer-custom">
         <div className="container">
@@ -146,7 +183,8 @@ function LandingPage({ isLoggedIn }) {
           </p>
         </div>
       </footer>
- {/* Admin Login Modal */}
+
+      {/* Admin Login Modal */}
       {showLogin && (
         <div className="overlay">
           <div className="login-box fade-in">

@@ -1,9 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
+from pydantic import BaseModel
+
 
 import models, schemas
 from database import get_db
+from models import User
 
 router = APIRouter(
     prefix="/users",
@@ -46,3 +49,25 @@ def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db.refresh(new_user)
 
     return new_user
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+@router.post("/login")
+def login(request: LoginRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == request.email).first()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # ✅ verify the plain password against hashed password
+    if not pwd_context.verify(request.password, user.password_hash):
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+
+    return {
+        "message": "Login successful",
+        "user_id": user.id,
+        "email": user.email,
+        "role": user.role,
+    }

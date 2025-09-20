@@ -28,10 +28,11 @@ const fetchReport = useCallback(async () => {
       headers: adminHeaders(),
     });
 
-    setReport(data);
-    setDepartment(data.department || "");
-    setUrgency(data.priority || "");
-    setProcess(data.process || "Unassigned"); 
+setReport(data);
+setDepartment(data.department || "");
+setUrgency(data.priority || "");
+setProcess(data.process || "Unassigned");
+setStatus(data.status || "Unresolved");  
   } catch (err) {
     console.error("Failed to fetch complaint", err);
   } finally {
@@ -44,12 +45,12 @@ const fetchReport = useCallback(async () => {
     fetchReport();
   }, [fetchReport]);
 
-  // check if anything changed
-  const isModified =
-    report &&
-    (department !== report.department ||
-      urgency !== report.priority ||
-      process !== report.process);
+  const isModified = report && (
+    department !== report.department ||
+    urgency !== report.priority ||
+    process !== report.process ||
+    status !== report.status
+  );
 
   const handleSave = async () => {
     try {
@@ -84,6 +85,16 @@ if (process && process !== report.process) {
           )
         );
       }
+
+      if (status && status !== report.status) {
+      updates.push(
+        api.put(
+          `/admin/complaints/${id}/status`,
+          { status },
+          { headers: adminHeaders() }
+        )
+      );
+    }
 
       await Promise.all(updates);
 
